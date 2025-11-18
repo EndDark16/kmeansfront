@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "recharts": "^3.4.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -26,5 +27,6 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.3",
     "vite": "^7.2.2"
-  }
+  },
+  "packageManager": "pnpm@10.22.0+sha1.3e9e4d522d30f3cf4cabb7506f5d15b89feffd04"
 }

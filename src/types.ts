@@ -16,6 +16,12 @@ export type SimulationResponse = {
   hospitals: Hospital[];
   assignments: number[];
   iterations: number;
+  grid_size: number;
+  inertia: number;
+  overall_avg_distance: number;
+  overall_max_distance: number;
+  cluster_stats: ClusterStats[];
+  distance_bins: DistanceBin[];
 };
 
 export type SimulationParams = {
@@ -28,4 +34,16 @@ export type PretrainedModel = {
   k: number;
   hospitals: number[][];
   description: string;
+};
+
+export type ClusterStats = {
+  hospital_id: number;
+  count: number;
+  avg_distance: number;
+  max_distance: number;
+};
+
+export type DistanceBin = {
+  label: string;
+  count: number;
 };

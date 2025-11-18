@@ -9,6 +9,7 @@ desplegar en Vercel.
 - Formulario para definir `m` (tamaño de la cuadrícula), `n` vecindarios y `k` hospitales.
 - Visualización SVG responsiva con grid futurista, vecindarios por color de cluster y hospitales resaltados.
 - Resumen de cada hospital: número de vecindarios, coordenadas y distancia media.
+- Panel de analítica con tarjetas KPI, gráficas (barras, líneas y áreas) para ver carga por hospital, distancias y distribución.
 - Botón para leer el modelo preentrenado (`/kmeans/pretrained`) como referencia.
 - Configuración de API via `VITE_API_URL` para diferenciar desarrollo vs producción (Render).
 

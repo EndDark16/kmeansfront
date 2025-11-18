@@ -6,6 +6,20 @@ import type {
   SimulationParams,
   SimulationResponse,
 } from "./types";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 type EnrichedNeighborhood = Neighborhood & { cluster: number };
 type EnrichedResult = Omit<SimulationResponse, "neighborhoods"> & {
@@ -184,6 +198,55 @@ function App() {
   const [pretrainedLoading, setPretrainedLoading] = useState(false);
 
   const summary = useClusterSummary(result);
+  const clusterChartData = useMemo(() => {
+    if (!result) return [];
+    return result.cluster_stats.map((stat, idx) => ({
+      hospital: `H${stat.hospital_id}`,
+      count: stat.count,
+      avg: Number(stat.avg_distance.toFixed(2)),
+      max: Number(stat.max_distance.toFixed(2)),
+      color: clusterPalette[idx % clusterPalette.length],
+    }));
+  }, [result]);
+
+  const distanceHistogramData = useMemo(() => {
+    if (!result) return [];
+    return result.distance_bins.map((bin) => ({
+      label: bin.label,
+      count: bin.count,
+    }));
+  }, [result]);
+
+  const statHighlights = useMemo(() => {
+    if (!result) return [];
+    return [
+      {
+        label: "Vecindarios simulados",
+        value: result.neighborhoods.length,
+        caption: `${result.grid_size} km de lado`,
+      },
+      {
+        label: "Hospitales sugeridos",
+        value: result.hospitals.length,
+        caption: `${result.iterations} iteraciones`,
+      },
+      {
+        label: "Distancia promedio",
+        value: formatKm(result.overall_avg_distance),
+        caption: "Promedio global",
+      },
+      {
+        label: "Distancia máxima",
+        value: formatKm(result.overall_max_distance),
+        caption: "Caso más lejano",
+      },
+      {
+        label: "Inercia total",
+        value: result.inertia.toFixed(2),
+        caption: "Suma de distancias²",
+      },
+    ];
+  }, [result]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -369,6 +432,96 @@ function App() {
             </div>
           )}
         </section>
+
+        {result && (
+          <>
+            <section className="analytics">
+              {statHighlights.map((stat) => (
+                <article key={stat.label} className="stat-card">
+                  <p>{stat.label}</p>
+                  <strong>{stat.value}</strong>
+                  <span>{stat.caption}</span>
+                </article>
+              ))}
+            </section>
+
+            <section className="charts-grid">
+              <article className="chart-card">
+                <header>
+                  <h3>Vecindarios por hospital</h3>
+                  <p>Comprueba el balance de carga entre cada centro.</p>
+                </header>
+                {clusterChartData.length ? (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={clusterChartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                      <XAxis dataKey="hospital" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" allowDecimals={false} />
+                      <Tooltip
+                        contentStyle={{ background: "#0f172a", borderRadius: "0.8rem", border: "1px solid rgba(148,163,184,0.3)" }}
+                      />
+                      <Bar dataKey="count" fill="#7c3aed" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <p className="empty-state">Sin datos para mostrar.</p>
+                )}
+              </article>
+
+              <article className="chart-card">
+                <header>
+                  <h3>Calidad de cobertura</h3>
+                  <p>Compara distancias promedio vs máximas por hospital.</p>
+                </header>
+                {clusterChartData.length ? (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <LineChart data={clusterChartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                      <XAxis dataKey="hospital" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
+                      <Tooltip
+                        contentStyle={{ background: "#0f172a", borderRadius: "0.8rem", border: "1px solid rgba(148,163,184,0.3)" }}
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="avg" name="Promedio (km)" stroke="#ffbe0b" strokeWidth={2} />
+                      <Line type="monotone" dataKey="max" name="Máximo (km)" stroke="#00b4d8" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <p className="empty-state">Sin datos para mostrar.</p>
+                )}
+              </article>
+
+              <article className="chart-card span-2">
+                <header>
+                  <h3>Distribución de distancias</h3>
+                  <p>Cuántos vecindarios deben viajar más en esta simulación.</p>
+                </header>
+                {distanceHistogramData.length ? (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <AreaChart data={distanceHistogramData}>
+                      <defs>
+                        <linearGradient id="distanceGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.1} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                      <XAxis dataKey="label" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" allowDecimals={false} />
+                      <Tooltip
+                        contentStyle={{ background: "#0f172a", borderRadius: "0.8rem", border: "1px solid rgba(148,163,184,0.3)" }}
+                      />
+                      <Area type="monotone" dataKey="count" stroke="#f43f5e" fillOpacity={1} fill="url(#distanceGradient)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <p className="empty-state">Sin datos para mostrar.</p>
+                )}
+              </article>
+            </section>
+          </>
+        )}
       </main>
 
       <section className="pretrained-section">
