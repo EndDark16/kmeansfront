@@ -1,3 +1,11 @@
+<!-- technical-overview: EndDark16/kmeansfront -->
+
+**Introduccion tecnica**
+
+Interfaz React y Vite para configurar una simulacion de vecindarios y visualizar hospitales asignados por el backend K-Means. Presenta resultados geoespaciales y metricas consumiendo la API mediante VITE_API_URL.
+
+---
+
 # K-Means Hospitals – Frontend
 
 Interfaz React + Vite en modo oscuro para simular vecindarios y mostrar la
